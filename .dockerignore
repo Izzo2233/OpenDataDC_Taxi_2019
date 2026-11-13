@@ -1,0 +1,7 @@
+﻿.venv
+.git
+__pycache__
+data/
+notebooks/
+Washington _ DC _ taxi rides/
+*.pyc

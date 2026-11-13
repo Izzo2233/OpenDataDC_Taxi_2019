@@ -1,0 +1,7 @@
+﻿global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "dc-taxi-api"
+    static_configs:
+      - targets: ["taxi-api:8000"]
