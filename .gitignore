@@ -1,8 +1,12 @@
 ﻿.venv/
 __pycache__/
 *.pyc
+*.csv
+*.db
+*.db-shm
+*.db-wal
 data/
+mlruns/
 mlruns_artifacts/
-models/*.pkl
-models/*.joblib
+models/
 "Washington _ DC _ taxi rides/"
