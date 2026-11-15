@@ -6,6 +6,7 @@ import mlflow
 import mlflow.pyfunc
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from prometheus_client import Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
@@ -13,6 +14,13 @@ TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 MODEL_URI = os.getenv("MODEL_URI", "models:/dc-taxi-fare-model@champion")
 
 ml_models = {}
+
+# Custom Prometheus metric to monitor predicted fare distribution & drift
+PREDICTED_FARE_HISTOGRAM = Histogram(
+    "dc_taxi_predicted_fare_dollars",
+    "Distribution of predicted taxi fares in USD",
+    buckets=[5.0, 10.0, 15.0, 20.0, 30.0, 45.0, 60.0, 80.0, 100.0, 150.0],
+)
 
 
 def load_champion_model():
@@ -31,11 +39,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="DC Taxi Fare Prediction API",
-    version="2.2.0",
+    version="2.3.0",
     lifespan=lifespan,
 )
 
-# Expose Prometheus metrics at /metrics
+# Expose default HTTP metrics + custom fare histogram at /metrics
 Instrumentator().instrument(app).expose(app)
 
 
@@ -85,8 +93,10 @@ def predict_fare(trip: TaxiTripRequest):
     df["ORIGINZIP"] = df["ORIGINZIP"].astype(str)
     df["is_coords_missing"] = df["ORIGIN_BLOCK_LATITUDE"].isna().astype(int)
 
-    prediction = ml_models["champion"].predict(df)[0]
+    fare = round(float(ml_models["champion"].predict(df)[0]), 2)
+    PREDICTED_FARE_HISTOGRAM.observe(fare)
+
     return PredictionResponse(
-        predicted_fare=round(float(prediction), 2),
+        predicted_fare=fare,
         model_uri=MODEL_URI,
     )

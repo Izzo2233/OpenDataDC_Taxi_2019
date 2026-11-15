@@ -1,0 +1,73 @@
+﻿{
+  "title": "DC Taxi Fare API — Live MLOps Observability",
+  "uid": "dc-taxi-fastapi-obs",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Prediction Throughput (/predict req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{handler=\"/predict\"}[1m]))",
+          "legendFormat": "Predictions / sec",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Inference Latency (p50 & p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{handler=\"/predict\"}[1m])) by (le))",
+          "legendFormat": "p95 Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{handler=\"/predict\"}[1m])) by (le))",
+          "legendFormat": "p50 Latency",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Rolling Average Predicted Fare ($ USD — Drift Monitor)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        {
+          "expr": "rate(dc_taxi_predicted_fare_dollars_sum[2m]) / rate(dc_taxi_predicted_fare_dollars_count[2m])",
+          "legendFormat": "Avg Predicted Fare ($)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Total /predict Requests Served",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        {
+          "expr": "sum(http_requests_total{handler=\"/predict\",status=\"2xx\"})",
+          "legendFormat": "2xx Success",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
