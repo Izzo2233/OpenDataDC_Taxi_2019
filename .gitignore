@@ -10,3 +10,5 @@ mlruns/
 mlruns_artifacts/
 models/
 "Washington _ DC _ taxi rides/"
+# Raw Taxi 2019 datasets
+taxi_2019_*.txt
