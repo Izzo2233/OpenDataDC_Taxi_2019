@@ -18,3 +18,8 @@ docker compose up --build
 
 ## FastAPI Live Demo
 ![FastAPI Live Demo](assets/fastapi_demo.png)
+
+## Offline Batch Inference
+```bash
+python batch_inference.py --input data/test_data.parquet --output data/batch_predictions.parquet
+```
