@@ -15,3 +15,6 @@ docker compose up --build
 
 ## FastAPI Live Demo
 ![FastAPI Live Demo](assets/fastapi_demo.gif)
+
+## FastAPI Live Demo
+![FastAPI Live Demo](assets/fastapi_demo.png)
